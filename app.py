@@ -1,7 +1,7 @@
 from sklearn.cluster import KMeans
 #import matplotlib.pyplot as plt
 import numpy as np
-import cv2
+#import cv2
 
 from collections import Counter
 from skimage.color import rgb2lab, deltaE_cie76
@@ -17,10 +17,10 @@ app = FastAPI()
 def RGB2HEX(color):
     return "#{:02x}{:02x}{:02x}".format(int(color[0]), int(color[1]), int(color[2]))
 
-def get_image(image_path):
-    image = cv2.imread(image_path)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    return image
+# def get_image(image_path):
+#     image = cv2.imread(image_path)
+#     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+#     return image
 
 def flatten(modified_image):
     modified_image = modified_image.reshape(modified_image.shape[0]*modified_image.shape[1], 3)
