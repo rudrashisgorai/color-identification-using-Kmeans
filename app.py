@@ -1,13 +1,13 @@
 from sklearn.cluster import KMeans
 #import matplotlib.pyplot as plt
 import numpy as np
-#import cv2
+
 
 from collections import Counter
 from skimage.color import rgb2lab, deltaE_cie76
 
 from fastapi import FastAPI, File, UploadFile
-
+#import cv2
 from PIL import Image
 from io import BytesIO
 
@@ -32,7 +32,8 @@ def read_imagefile(file) -> Image.Image:
 
 def colors(NO_OF_COLORS : int , image : np.ndarray):
     try:
-        modified_image = flatten(image)
+        #modified_image = flatten(image)
+        modified_image = image
         clf = KMeans(n_clusters = NO_OF_COLORS)
         labels = clf.fit_predict(modified_image)
 
@@ -49,8 +50,8 @@ def colors(NO_OF_COLORS : int , image : np.ndarray):
 
 
 
-@app.post("/files/")
-async def create_file( NO_OF_COLORS: int ,file: UploadFile = File(...) ):
+@app.post("/get-colors")
+async def get_colors( NO_OF_COLORS: int ,file: UploadFile = File(...) ):
     try:
         extension = file.filename.split(".")[-1] in ("jpg", "jpeg", "png")
         if not extension:
@@ -58,7 +59,14 @@ async def create_file( NO_OF_COLORS: int ,file: UploadFile = File(...) ):
 
         
         image = read_imagefile(await file.read())
+        print(image.size)
+        image = image.convert('RGB')
+        image = image.resize((100 , 100))
+        
         image = np.array(image)
+        print(image.shape)
+        image = flatten(image)
+        print(image.shape)
 
         
         return colors(NO_OF_COLORS , image)
@@ -70,6 +78,3 @@ async def create_file( NO_OF_COLORS: int ,file: UploadFile = File(...) ):
 
 
 
-@app.post("/uploadfile/")
-async def create_upload_file(file: UploadFile = File(...)):
-    return {"filename": file.filename}
