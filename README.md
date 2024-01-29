@@ -55,16 +55,6 @@ print(response.json())
 
 Your contributions are always welcome! Please check the [issues page](https://github.com/rudrashisgorai/color-identification-using-Kmeans/issues) for open issues or feel free to open a new one.
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/rudrashisgorai/color-identification-using-Kmeans/blob/master/LICENSE) file for details.
-
-## Acknowledgments
-
-- Thanks to scikit-learn for clustering algorithms.
-- FastAPI for web service framework.
-- Pillow for image processing functionalities.
-
 ## Contact
 
 Project Link: [https://github.com/rudrashisgorai/color-identification-using-Kmeans](https://github.com/rudrashisgorai/color-identification-using-Kmeans)
