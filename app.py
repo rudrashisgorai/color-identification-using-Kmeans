@@ -42,7 +42,10 @@ async def get_colors(no_of_colors: int, file: UploadFile = File(...)):
 
         image = read_imagefile(await file.read())
         image = image.convert("RGB")  # Ensure image is in RGB format
-        image = image.resize((100, 100), Image.ANTIALIAS)  # Resize for faster processing
+
+       
+
+        image = image.resize((100, 100))  # Resize for faster processing
         
         image_array = np.array(image)
         flattened_image_array = flatten(image_array)
