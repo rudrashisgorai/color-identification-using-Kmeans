@@ -27,7 +27,7 @@ pip install -r requirements.txt
 To run the server:
 
 ```bash
-uvicorn main:app --reload
+uvicorn app:app --reload
 ```
 
 The API will be accessible at `http://127.0.0.1:8000`.
@@ -43,11 +43,11 @@ The API will be accessible at `http://127.0.0.1:8000`.
 ```python
 import requests
 
-url = 'http://127.0.0.1:8000/get-colors'
-files = {'file': open('your_image.jpg', 'rb')}
-data = {'NO_OF_COLORS': 3}
+url = 'http://127.0.0.1:8000/get-colors?NO_OF_COLORS=5'
+files = {'file': ('pikachu.jpg', open('pikachu.jpg', 'rb'), 'image/jpeg')}  # Correct file and type
+headers = {'accept': 'application/json'}  # Explicitly accept application/json
 
-response = requests.post(url, files=files, data=data)
+response = requests.post(url, files=files, headers=headers)  
 print(response.json())
 ```
 
