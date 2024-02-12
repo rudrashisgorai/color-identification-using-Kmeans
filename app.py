@@ -1,81 +1,57 @@
 from sklearn.cluster import KMeans
-
-# import matplotlib.pyplot as plt
 import numpy as np
-
-
 from collections import Counter
-from skimage.color import rgb2lab, deltaE_cie76
-
-from fastapi import FastAPI, File, UploadFile
-
-# import cv2
 from PIL import Image
 from io import BytesIO
+from fastapi import FastAPI, File, UploadFile
 
 app = FastAPI()
 
-
 def RGB2HEX(color):
+    """Convert RGB color to HEX format."""
     return "#{:02x}{:02x}{:02x}".format(int(color[0]), int(color[1]), int(color[2]))
 
-
-# def get_image(image_path):
-#     image = cv2.imread(image_path)
-#     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-#     return image
-
-
-def flatten(modified_image):
-    modified_image = modified_image.reshape(
-        modified_image.shape[0] * modified_image.shape[1], 3
-    )
-    return modified_image
-
+def flatten(image_array):
+    """Flatten a 3D image array to 2D."""
+    return image_array.reshape(image_array.shape[0] * image_array.shape[1], 3)
 
 def read_imagefile(file) -> Image.Image:
-    image = Image.open(BytesIO(file))
-    return image
+    """Read image file as PIL Image."""
+    return Image.open(BytesIO(file))
 
-
-def colors(NO_OF_COLORS: int, image: np.ndarray):
+def extract_colors(n_colors, image_array):
+    """Extract N most dominant colors from an image."""
     try:
-        # modified_image = flatten(image)
-        modified_image = image
-        clf = KMeans(n_clusters=NO_OF_COLORS)
-        labels = clf.fit_predict(modified_image)
-
+        clf = KMeans(n_clusters=n_colors)
+        labels = clf.fit_predict(image_array)
         counts = Counter(labels)
-
         center_colors = clf.cluster_centers_
-
         ordered_colors = [center_colors[i] for i in counts.keys()]
-
         hex_colors = [RGB2HEX(ordered_colors[i]) for i in counts.keys()]
         return hex_colors
     except Exception as e:
-        print(e)
-
+        print(f"An error occurred: {e}")
+        return None
 
 @app.post("/get-colors")
-async def get_colors(NO_OF_COLORS: int, file: UploadFile = File(...)):
+async def get_colors(no_of_colors: int, file: UploadFile = File(...)):
+    """API endpoint to extract dominant colors from an uploaded image."""
     try:
-        extension = file.filename.split(".")[-1] in ("jpg", "jpeg", "png")
-        if not extension:
-            return "Image must be jpg or png format!"
+        if file.content_type not in ["image/jpeg", "image/png"]:
+            return {"error": "Image must be in JPEG or PNG format."}
 
         image = read_imagefile(await file.read())
-        print(image.size)
-        image = image.convert("RGB")
-        image = image.resize((100, 100))
+        image = image.convert("RGB")  # Ensure image is in RGB format
+        image = image.resize((100, 100), Image.ANTIALIAS)  # Resize for faster processing
+        
+        image_array = np.array(image)
+        flattened_image_array = flatten(image_array)
 
-        image = np.array(image)
-        print(image.shape)
-        image = flatten(image)
-        print(image.shape)
-
-        return colors(NO_OF_COLORS, image)
-
+        dominant_colors = extract_colors(no_of_colors, flattened_image_array)
+        if dominant_colors:
+            return {"dominant_colors": dominant_colors}
+        else:
+            return {"error": "Could not determine dominant colors."}
     except Exception as e:
-        print(e)
-        return f"{e}"
+        return {"error": str(e)}
+
